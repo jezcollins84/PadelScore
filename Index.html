@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Padel Scorer</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f0f0;
+            text-align: center;
+        }
+
+        .container {
+            display: flex;
+            height: 100vh;
+        }
+
+        .team-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 2em;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        #team1 {
+            background-color: #3498db;
+        }
+
+        #team2 {
+            background-color: #e74c3c;
+        }
+
+        #team1:active {
+            background-color: #2980b9;
+        }
+
+        #team2:active {
+            background-color: #c0392b;
+        }
+
+        .score-display {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            font-size: 3em;
+        }
+        
+        .score-display .games {
+            font-size: 0.5em;
+            margin-bottom: 10px;
+        }
+
+        .score-display .points {
+            font-size: 1em;
+            font-weight: bold;
+        }
+
+        .button-group {
+            position: fixed;
+            bottom: 20px;
+            width: 100%;
+            display: flex;
+            justify-content: space-around;
+        }
+        
+        .reset-button {
+            padding: 10px 20px;
+            font-size: 1em;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+            background-color: #95a5a6;
+            color: white;
+        }
+
+        .settings-button {
+            padding: 10px 20px;
+            font-size: 1em;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+            background-color: #2c3e50;
+            color: white;
+        }
+
+        /* Initial setup screen styles */
+        #setup-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        
+        .team-input {
+            margin: 10px 0;
+            padding: 10px;
+            font-size: 1.2em;
+        }
+        
+        .start-button {
+            padding: 15px 30px;
+            font-size: 1.5em;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            background-color: #27ae60;
+            color: white;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="setup-screen">
+        <h2>Padel Scorer Setup</h2>
+        <input type="text" class="team-input" id="team1-name-input" placeholder="Team 1 Name">
+        <input type="text" class="team-input" id="team2-name-input" placeholder="Team 2 Name">
+        <button class="start-button" id="start-button">Start Match</button>
+    </div>
+
+    <div class="container" id="game-screen" style="display: none;">
+        <div class="team-section" id="team1">
+            <span id="team1-name"></span>
+        </div>
+        <div class="team-section" id="team2">
+            <span id="team2-name"></span>
+        </div>
+
+        <div class="score-display">
+            <div class="games" id="game-score">0 - 0</div>
+            <div class="points" id="point-score">0 - 0</div>
+        </div>
+
+        <div class="button-group">
+            <button class="reset-button" id="reset-button">Reset Game</button>
+        </div>
+    </div>
+    
+    <script>
+        // DOM Elements
+        const setupScreen = document.getElementById('setup-screen');
+        const gameScreen = document.getElementById('game-screen');
+        const team1NameInput = document.getElementById('team1-name-input');
+        const team2NameInput = document.getElementById('team2-name-input');
+        const startButton = document.getElementById('start-button');
+        const team1NameDisplay = document.getElementById('team1-name');
+        const team2NameDisplay = document.getElementById('team2-name');
+        const gameScoreDisplay = document.getElementById('game-score');
+        const pointScoreDisplay = document.getElementById('point-score');
+        const team1Section = document.getElementById('team1');
+        const team2Section = document.getElementById('team2');
+        const resetButton = document.getElementById('reset-button');
+
+        let team1Points = 0;
+        let team2Points = 0;
+        let team1Games = 0;
+        let team2Games = 0;
+
+        // Point values for tennis scoring
+        const points = ["0", "15", "30", "40", "Ad"];
+        
+        // Functions
+        function updatePointScore() {
+            if (team1Points === 4 && team2Points === 4) {
+                pointScoreDisplay.textContent = "Deuce";
+            } else if (team1Points > 4 && team1Points > team2Points) {
+                pointScoreDisplay.textContent = "Ad - " + points[team2Points];
+            } else if (team2Points > 4 && team2Points > team1Points) {
+                pointScoreDisplay.textContent = points[team1Points] + " - Ad";
+            } else {
+                pointScoreDisplay.textContent = points[team1Points] + " - " + points[team2Points];
+            }
+        }
+
+        function updateGameScore() {
+            gameScoreDisplay.textContent = `${team1Games} - ${team2Games}`;
+        }
+        
+        function checkWin() {
+            if (team1Points >= 4 && team1Points >= team2Points + 2) {
+                team1Games++;
+                resetPoints();
+            } else if (team2Points >= 4 && team2Points >= team1Points + 2) {
+                team2Games++;
+                resetPoints();
+            }
+            updateGameScore();
+        }
+
+        function resetPoints() {
+            team1Points = 0;
+            team2Points = 0;
+            updatePointScore();
+        }
+
+        // Event Listeners
+        startButton.addEventListener('click', () => {
+            const team1Name = team1NameInput.value || "Team 1";
+            const team2Name = team2NameInput.value || "Team 2";
+            
+            team1NameDisplay.textContent = team1Name;
+            team2NameDisplay.textContent = team2Name;
+            
+            setupScreen.style.display = 'none';
+            gameScreen.style.display = 'flex';
+        });
+
+        team1Section.addEventListener('click', () => {
+            team1Points++;
+            checkWin();
+            updatePointScore();
+        });
+
+        team2Section.addEventListener('click', () => {
+            team2Points++;
+            checkWin();
+            updatePointScore();
+        });
+
+        resetButton.addEventListener('click', () => {
+            resetPoints();
+        });
+    </script>
+</body>
+</html>
