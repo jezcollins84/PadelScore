@@ -112,13 +112,14 @@
         }
 
         .logo {
-            position: absolute;
+            position: fixed;
             top: 20px;
             left: 50%;
             transform: translateX(-50%);
             width: 60px;
             height: 60px;
             z-index: 1001;
+            background-color: transparent;
         }
 
         .logo img {
@@ -238,13 +239,6 @@
             font-style: italic;
         }
 
-        .result-actions {
-            display: flex;
-            gap: 10px; /* This is the new change */
-            flex-wrap: wrap; /* To handle wrapping on small screens */
-            justify-content: flex-end;
-        }
-
         .resume-button, .delete-button {
             border: none;
             padding: 8px 12px;
@@ -261,14 +255,22 @@
         .delete-button {
             background-color: #c0392b;
         }
+
+        .result-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
     </style>
 </head>
 <body>
 
+    <div class="logo">
+        <img src="logo.png" alt="Padel Racket Logo">
+    </div>
+
     <div id="setup-screen">
-        <div class="logo">
-            <img src="logo.png" alt="Padel Racket Logo">
-        </div>
         <h2>Padel Scorer Setup</h2>
         <div class="team-setup">
             <input type="text" class="team-name-input" id="team1-name-input" placeholder="Team 1 Name">
@@ -301,9 +303,6 @@
     </div>
 
     <div class="container" id="game-screen" style="display: none;">
-        <div class="logo">
-            <img src="logo.png" alt="Padel Racket Logo">
-        </div>
         <div class="team-section" id="team1">
             <span id="team1-name"></span>
         </div>
@@ -324,9 +323,6 @@
     </div>
 
     <div id="results-screen" style="display: none;">
-        <div class="logo">
-            <img src="logo.png" alt="Padel Racket Logo">
-        </div>
         <button class="home-button" id="back-to-home-from-results">BACK TO HOME</button>
         <h2>Past Results</h2>
         <ul id="results-list"></ul>
