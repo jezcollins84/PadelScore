@@ -58,7 +58,7 @@
             text-align: center;
             font-size: 3em;
         }
-        
+
         .score-display .games {
             font-size: 0.5em;
             margin-bottom: 10px;
@@ -76,7 +76,7 @@
             display: flex;
             justify-content: space-around;
         }
-        
+
         .reset-button {
             padding: 10px 20px;
             font-size: 1em;
@@ -111,13 +111,15 @@
             align-items: center;
             z-index: 1000;
         }
-        
-        .team-input {
+
+        .team-input, .scoring-select {
             margin: 10px 0;
             padding: 10px;
             font-size: 1.2em;
+            width: 80%;
+            max-width: 300px;
         }
-        
+
         .start-button {
             padding: 15px 30px;
             font-size: 1.5em;
@@ -136,6 +138,10 @@
         <h2>Padel Scorer Setup</h2>
         <input type="text" class="team-input" id="team1-name-input" placeholder="Team 1 Name">
         <input type="text" class="team-input" id="team2-name-input" placeholder="Team 2 Name">
+        <select class="scoring-select" id="scoring-type-select">
+            <option value="tennis">Tennis Scoring</option>
+            <option value="games-only">Games Only</option>
+        </select>
         <button class="start-button" id="start-button">Start Match</button>
     </div>
 
@@ -156,13 +162,14 @@
             <button class="reset-button" id="reset-button">Reset Game</button>
         </div>
     </div>
-    
+
     <script>
         // DOM Elements
         const setupScreen = document.getElementById('setup-screen');
         const gameScreen = document.getElementById('game-screen');
         const team1NameInput = document.getElementById('team1-name-input');
         const team2NameInput = document.getElementById('team2-name-input');
+        const scoringTypeSelect = document.getElementById('scoring-type-select');
         const startButton = document.getElementById('start-button');
         const team1NameDisplay = document.getElementById('team1-name');
         const team2NameDisplay = document.getElementById('team2-name');
@@ -176,12 +183,18 @@
         let team2Points = 0;
         let team1Games = 0;
         let team2Games = 0;
+        let scoringType = "tennis"; // Default
 
         // Point values for tennis scoring
         const points = ["0", "15", "30", "40", "Ad"];
-        
+
         // Functions
         function updatePointScore() {
+            if (scoringType === "games-only") {
+                pointScoreDisplay.style.display = 'none';
+                return;
+            }
+            pointScoreDisplay.style.display = 'block';
             if (team1Points === 4 && team2Points === 4) {
                 pointScoreDisplay.textContent = "Deuce";
             } else if (team1Points > 4 && team1Points > team2Points) {
@@ -196,14 +209,16 @@
         function updateGameScore() {
             gameScoreDisplay.textContent = `${team1Games} - ${team2Games}`;
         }
-        
+
         function checkWin() {
-            if (team1Points >= 4 && team1Points >= team2Points + 2) {
-                team1Games++;
-                resetPoints();
-            } else if (team2Points >= 4 && team2Points >= team1Points + 2) {
-                team2Games++;
-                resetPoints();
+            if (scoringType === "tennis") {
+                if (team1Points >= 4 && team1Points >= team2Points + 2) {
+                    team1Games++;
+                    resetPoints();
+                } else if (team2Points >= 4 && team2Points >= team1Points + 2) {
+                    team2Games++;
+                    resetPoints();
+                }
             }
             updateGameScore();
         }
@@ -218,28 +233,48 @@
         startButton.addEventListener('click', () => {
             const team1Name = team1NameInput.value || "Team 1";
             const team2Name = team2NameInput.value || "Team 2";
-            
+            scoringType = scoringTypeSelect.value;
+
             team1NameDisplay.textContent = team1Name;
             team2NameDisplay.textContent = team2Name;
-            
+
             setupScreen.style.display = 'none';
             gameScreen.style.display = 'flex';
+            updatePointScore(); // To hide points if "Games Only" is selected
         });
 
         team1Section.addEventListener('click', () => {
-            team1Points++;
-            checkWin();
-            updatePointScore();
+            if (scoringType === "games-only") {
+                team1Games++;
+            } else {
+                team1Points++;
+                checkWin();
+                updatePointScore();
+            }
+            updateGameScore();
         });
 
         team2Section.addEventListener('click', () => {
-            team2Points++;
-            checkWin();
-            updatePointScore();
+            if (scoringType === "games-only") {
+                team2Games++;
+            } else {
+                team2Points++;
+                checkWin();
+                updatePointScore();
+            }
+            updateGameScore();
         });
 
         resetButton.addEventListener('click', () => {
-            resetPoints();
+            if (scoringType === "games-only") {
+                // In games-only mode, reset both games and points (for starting a new set)
+                team1Games = 0;
+                team2Games = 0;
+            } else {
+                // In tennis mode, just reset points
+                resetPoints();
+            }
+            updateGameScore();
         });
     </script>
 </body>
