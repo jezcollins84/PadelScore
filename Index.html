@@ -16,7 +16,7 @@
         .container {
             display: flex;
             height: 100vh;
-            padding-top: 80px; /* Add space for the logo */
+            padding-top: 80px;
             box-sizing: border-box;
         }
 
@@ -102,13 +102,13 @@
             justify-content: center;
             align-items: center;
             z-index: 1000;
-            padding-top: 80px; /* Add space for the logo */
+            padding-top: 80px;
             box-sizing: border-box;
         }
         
         #results-screen {
             justify-content: flex-start;
-            padding-top: 100px; /* More padding for results page due to button */
+            padding-top: 100px;
         }
 
         .logo {
@@ -116,15 +116,15 @@
             top: 20px;
             left: 50%;
             transform: translateX(-50%);
-            width: 60px; /* Slightly larger logo */
+            width: 60px;
             height: 60px;
-            z-index: 1001; /* Ensure logo stays on top */
+            z-index: 1001;
         }
 
         .logo img {
             width: 100%;
             height: 100%;
-            object-fit: contain; /* Ensures the image fits without cropping */
+            object-fit: contain;
         }
 
         h2 {
@@ -132,7 +132,7 @@
         }
 
         #results-screen h2 {
-            margin-top: 20px; /* Adjust spacing below the button and logo */
+            margin-top: 20px;
         }
 
         .team-setup {
@@ -238,6 +238,13 @@
             font-style: italic;
         }
 
+        .result-actions {
+            display: flex;
+            gap: 10px; /* This is the new change */
+            flex-wrap: wrap; /* To handle wrapping on small screens */
+            justify-content: flex-end;
+        }
+
         .resume-button, .delete-button {
             border: none;
             padding: 8px 12px;
@@ -245,7 +252,6 @@
             cursor: pointer;
             font-weight: bold;
             color: white;
-            margin-left: 5px;
         }
 
         .resume-button {
@@ -425,13 +431,11 @@
             };
 
             if (currentMatchTimestamp) {
-                // Update existing game
                 const existingGameIndex = games.findIndex(game => game.timestamp === currentMatchTimestamp);
                 if (existingGameIndex !== -1) {
                     games[existingGameIndex] = gameData;
                 }
             } else {
-                // Add new game
                 games.unshift(gameData);
             }
             
@@ -462,7 +466,7 @@
                         <div>${game.date} at ${game.time}</div>
                         <div>Status: ${game.status}</div>
                     </div>
-                    <div>
+                    <div class="result-actions">
                         ${resumeButton}
                         <button class="delete-button" data-timestamp="${game.timestamp}">DELETE</button>
                     </div>
@@ -476,7 +480,7 @@
                     let games = JSON.parse(localStorage.getItem('padelGames')) || [];
                     games = games.filter(game => game.timestamp !== timestampToDelete);
                     localStorage.setItem('padelGames', JSON.stringify(games));
-                    loadResults(); // Reload the list
+                    loadResults();
                 });
             });
 
