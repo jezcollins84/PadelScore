@@ -16,6 +16,8 @@
         .container {
             display: flex;
             height: 100vh;
+            padding-top: 80px; /* Add space for the logo */
+            box-sizing: border-box;
         }
 
         .team-section {
@@ -100,23 +102,37 @@
             justify-content: center;
             align-items: center;
             z-index: 1000;
+            padding-top: 80px; /* Add space for the logo */
+            box-sizing: border-box;
         }
         
         #results-screen {
             justify-content: flex-start;
-            padding-top: 20px;
+            padding-top: 100px; /* More padding for results page due to button */
         }
 
         .logo {
             position: absolute;
             top: 20px;
-            width: 50px;
-            height: 50px;
-            margin-bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px; /* Slightly larger logo */
+            height: 60px;
+            z-index: 1001; /* Ensure logo stays on top */
         }
 
         .logo img {
             width: 100%;
+            height: 100%;
+            object-fit: contain; /* Ensures the image fits without cropping */
+        }
+
+        h2 {
+            margin-top: 0;
+        }
+
+        #results-screen h2 {
+            margin-top: 20px; /* Adjust spacing below the button and logo */
         }
 
         .team-setup {
@@ -245,7 +261,7 @@
 
     <div id="setup-screen">
         <div class="logo">
-            <img src="https://www.flaticon.com/svg/static/icons/svg/2507/2507043.svg" alt="Padel Racket Logo">
+            <img src="logo.png" alt="Padel Racket Logo">
         </div>
         <h2>Padel Scorer Setup</h2>
         <div class="team-setup">
@@ -280,7 +296,7 @@
 
     <div class="container" id="game-screen" style="display: none;">
         <div class="logo">
-            <img src="https://www.flaticon.com/svg/static/icons/svg/2507/2507043.svg" alt="Padel Racket Logo">
+            <img src="logo.png" alt="Padel Racket Logo">
         </div>
         <div class="team-section" id="team1">
             <span id="team1-name"></span>
@@ -303,7 +319,7 @@
 
     <div id="results-screen" style="display: none;">
         <div class="logo">
-            <img src="https://www.flaticon.com/svg/static/icons/svg/2507/2507043.svg" alt="Padel Racket Logo">
+            <img src="logo.png" alt="Padel Racket Logo">
         </div>
         <button class="home-button" id="back-to-home-from-results">BACK TO HOME</button>
         <h2>Past Results</h2>
@@ -379,228 +395,3 @@
             } else if (team2Points >= 4 && team2Points >= team1Points + 2) {
                 team2Games++;
                 resetPoints();
-            }
-            updateGameScore();
-        }
-
-        function resetPoints() {
-            team1Points = 0;
-            team2Points = 0;
-            updatePointScore();
-        }
-        
-        function saveGame(status) {
-            let games = JSON.parse(localStorage.getItem('padelGames')) || [];
-            
-            const gameData = {
-                team1Name: team1Name,
-                team2Name: team2Name,
-                team1Games: team1Games,
-                team2Games: team2Games,
-                team1Points: team1Points,
-                team2Points: team2Points,
-                team1Color: team1Color,
-                team2Color: team2Color,
-                scoringType: scoringType,
-                date: new Date().toLocaleDateString(),
-                time: new Date().toLocaleTimeString(undefined, {hour: '2-digit', minute: '2-digit'}),
-                status: status,
-                timestamp: currentMatchTimestamp || new Date().getTime()
-            };
-
-            if (currentMatchTimestamp) {
-                // Update existing game
-                const existingGameIndex = games.findIndex(game => game.timestamp === currentMatchTimestamp);
-                if (existingGameIndex !== -1) {
-                    games[existingGameIndex] = gameData;
-                }
-            } else {
-                // Add new game
-                games.unshift(gameData);
-            }
-            
-            localStorage.setItem('padelGames', JSON.stringify(games));
-        }
-
-        function loadResults() {
-            let games = JSON.parse(localStorage.getItem('padelGames')) || [];
-            resultsList.innerHTML = '';
-            if (games.length === 0) {
-                const noResults = document.createElement('p');
-                noResults.textContent = "No past results found.";
-                noResults.style.textAlign = 'center';
-                resultsList.appendChild(noResults);
-                return;
-            }
-            games.forEach(game => {
-                const li = document.createElement('li');
-                li.className = 'result-item';
-                let resumeButton = '';
-                if (game.status === 'Live') {
-                    resumeButton = `<button class="resume-button" data-timestamp="${game.timestamp}">RESUME</button>`;
-                }
-                li.innerHTML = `
-                    <div class="result-details">
-                        <div class="teams">${game.team1Name} vs ${game.team2Name}</div>
-                        <div class="score">${game.team1Games} - ${game.team2Games}</div>
-                        <div>${game.date} at ${game.time}</div>
-                        <div>Status: ${game.status}</div>
-                    </div>
-                    <div>
-                        ${resumeButton}
-                        <button class="delete-button" data-timestamp="${game.timestamp}">DELETE</button>
-                    </div>
-                `;
-                resultsList.appendChild(li);
-            });
-
-            document.querySelectorAll('.delete-button').forEach(button => {
-                button.addEventListener('click', (e) => {
-                    const timestampToDelete = Number(e.target.dataset.timestamp);
-                    let games = JSON.parse(localStorage.getItem('padelGames')) || [];
-                    games = games.filter(game => game.timestamp !== timestampToDelete);
-                    localStorage.setItem('padelGames', JSON.stringify(games));
-                    loadResults(); // Reload the list
-                });
-            });
-
-            document.querySelectorAll('.resume-button').forEach(button => {
-                button.addEventListener('click', (e) => {
-                    const timestampToResume = Number(e.target.dataset.timestamp);
-                    const games = JSON.parse(localStorage.getItem('padelGames')) || [];
-                    const gameToResume = games.find(game => game.timestamp === timestampToResume);
-                    
-                    if (gameToResume) {
-                        team1Name = gameToResume.team1Name;
-                        team2Name = gameToResume.team2Name;
-                        team1Games = gameToResume.team1Games;
-                        team2Games = gameToResume.team2Games;
-                        team1Points = gameToResume.team1Points;
-                        team2Points = gameToResume.team2Points;
-                        scoringType = gameToResume.scoringType;
-                        team1Color = gameToResume.team1Color;
-                        team2Color = gameToResume.team2Color;
-                        currentMatchTimestamp = gameToResume.timestamp;
-
-                        team1NameInput.value = team1Name;
-                        team2NameInput.value = team2Name;
-                        team1NameDisplay.textContent = team1Name;
-                        team2NameDisplay.textContent = team2Name;
-                        team1Section.style.backgroundColor = team1Color;
-                        team2Section.style.backgroundColor = team2Color;
-                        scoringTypeSelect.value = scoringType;
-
-                        gameScreen.style.display = 'flex';
-                        resultsScreen.style.display = 'none';
-
-                        updateGameScore();
-                        updatePointScore();
-                    }
-                });
-            });
-        }
-        
-        function resetAppState() {
-            team1Points = 0;
-            team2Points = 0;
-            team1Games = 0;
-            team2Games = 0;
-            currentMatchTimestamp = null;
-            updateGameScore();
-            updatePointScore();
-            gameScreen.style.display = 'none';
-            resultsScreen.style.display = 'none';
-            setupScreen.style.display = 'flex';
-        }
-
-        // Event Listeners
-        startButton.addEventListener('click', () => {
-            team1Name = team1NameInput.value || "Team 1";
-            team2Name = team2NameInput.value || "Team 2";
-            scoringType = scoringTypeSelect.value;
-            
-            team1NameDisplay.textContent = team1Name;
-            team2NameDisplay.textContent = team2Name;
-            
-            team1Section.style.backgroundColor = team1Color;
-            team2Section.style.backgroundColor = team2Color;
-
-            setupScreen.style.display = 'none';
-            gameScreen.style.display = 'flex';
-            updatePointScore();
-        });
-
-        pastResultsButton.addEventListener('click', () => {
-            setupScreen.style.display = 'none';
-            gameScreen.style.display = 'none';
-            resultsScreen.style.display = 'flex';
-            loadResults();
-        });
-
-        backToHomeFromResultsButton.addEventListener('click', () => {
-            resultsScreen.style.display = 'none';
-            setupScreen.style.display = 'flex';
-        });
-
-        team1Section.addEventListener('click', () => {
-            if (scoringType === "games-only") {
-                team1Games++;
-            } else {
-                team1Points++;
-                checkWin();
-            }
-            updateGameScore();
-            updatePointScore();
-        });
-
-        team2Section.addEventListener('click', () => {
-            if (scoringType === "games-only") {
-                team2Games++;
-            } else {
-                team2Points++;
-                checkWin();
-            }
-            updateGameScore();
-            updatePointScore();
-        });
-
-        resetButton.addEventListener('click', () => {
-            if (scoringType === "games-only") {
-                team1Games = 0;
-                team2Games = 0;
-                updateGameScore();
-            } else {
-                resetPoints();
-            }
-        });
-
-        homeButton.addEventListener('click', () => {
-            saveGame('Live');
-            resetAppState();
-        });
-
-        endMatchButton.addEventListener('click', () => {
-            saveGame('Complete');
-            gameScreen.style.display = 'none';
-            resultsScreen.style.display = 'flex';
-            loadResults();
-        });
-
-        team1Colors.querySelectorAll('.color-swatch').forEach(swatch => {
-            swatch.addEventListener('click', () => {
-                team1Colors.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('selected'));
-                swatch.classList.add('selected');
-                team1Color = swatch.dataset.color;
-            });
-        });
-
-        team2Colors.querySelectorAll('.color-swatch').forEach(swatch => {
-            swatch.addEventListener('click', () => {
-                team2Colors.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('selected'));
-                swatch.classList.add('selected');
-                team2Color = swatch.dataset.color;
-            });
-        });
-    </script>
-</body>
-</html>
