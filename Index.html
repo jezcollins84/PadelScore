@@ -65,7 +65,7 @@
             justify-content: space-around;
         }
 
-        .reset-button, .back-button, .end-button, .home-button {
+        .reset-button, .home-button, .end-button {
             padding: 10px 20px;
             font-size: 1em;
             border-radius: 5px;
@@ -193,13 +193,21 @@
             font-style: italic;
         }
 
-        .delete-button {
-            background-color: #c0392b;
-            color: white;
+        .resume-button, .delete-button {
             border: none;
             padding: 8px 12px;
             border-radius: 5px;
             cursor: pointer;
+            font-weight: bold;
+            color: white;
+        }
+
+        .resume-button {
+            background-color: #27ae60;
+        }
+        
+        .delete-button {
+            background-color: #c0392b;
         }
     </style>
 </head>
@@ -348,8 +356,11 @@
                 team2Name: team2Name,
                 team1Games: team1Games,
                 team2Games: team2Games,
+                team1Points: team1Points,
+                team2Points: team2Points,
+                scoringType: scoringType,
                 date: now.toLocaleDateString(),
-                time: now.toLocaleTimeString(),
+                time: now.toLocaleTimeString(undefined, {hour: '2-digit', minute: '2-digit'}),
                 status: status,
                 timestamp: now.getTime()
             };
@@ -372,6 +383,12 @@
             games.forEach(game => {
                 const li = document.createElement('li');
                 li.className = 'result-item';
+                let actionButton = '';
+                if (game.status === 'Live') {
+                    actionButton = `<button class="resume-button" data-timestamp="${game.timestamp}">RESUME</button>`;
+                } else {
+                    actionButton = `<button class="delete-button" data-timestamp="${game.timestamp}">DELETE</button>`;
+                }
                 li.innerHTML = `
                     <div class="result-details">
                         <div class="score">${game.team1Games} - ${game.team2Games}</div>
@@ -379,7 +396,7 @@
                         <div>${game.date} at ${game.time}</div>
                         <div>Status: ${game.status}</div>
                     </div>
-                    <button class="delete-button" data-timestamp="${game.timestamp}">DELETE</button>
+                    ${actionButton}
                 `;
                 resultsList.appendChild(li);
             });
@@ -391,6 +408,35 @@
                     games = games.filter(game => game.timestamp != timestampToDelete);
                     localStorage.setItem('padelGames', JSON.stringify(games));
                     loadResults(); // Reload the list
+                });
+            });
+
+            document.querySelectorAll('.resume-button').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const timestampToResume = e.target.dataset.timestamp;
+                    const games = JSON.parse(localStorage.getItem('padelGames')) || [];
+                    const gameToResume = games.find(game => game.timestamp == timestampToResume);
+                    
+                    if (gameToResume) {
+                        team1Name = gameToResume.team1Name;
+                        team2Name = gameToResume.team2Name;
+                        team1Games = gameToResume.team1Games;
+                        team2Games = gameToResume.team2Games;
+                        team1Points = gameToResume.team1Points;
+                        team2Points = gameToResume.team2Points;
+                        scoringType = gameToResume.scoringType;
+
+                        team1NameInput.value = team1Name;
+                        team2NameInput.value = team2Name;
+                        team1NameDisplay.textContent = team1Name;
+                        team2NameDisplay.textContent = team2Name;
+
+                        gameScreen.style.display = 'flex';
+                        resultsScreen.style.display = 'none';
+
+                        updateGameScore();
+                        updatePointScore();
+                    }
                 });
             });
         }
