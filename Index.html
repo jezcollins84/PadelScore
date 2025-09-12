@@ -65,7 +65,7 @@
             justify-content: space-around;
         }
 
-        .reset-button, .back-button {
+        .reset-button, .back-button, .fullscreen-button {
             padding: 10px 20px;
             font-size: 1em;
             border-radius: 5px;
@@ -81,6 +81,10 @@
         
         .back-button {
             background-color: #34495e;
+        }
+        
+        .fullscreen-button {
+            background-color: #f39c12;
         }
 
         /* Initial setup screen styles */
@@ -193,6 +197,7 @@
         <div class="button-group">
             <button class="reset-button" id="reset-button">RESET GAME</button>
             <button class="back-button" id="back-to-start-button">BACK</button>
+            <button class="fullscreen-button" id="fullscreen-button">FULLSCREEN</button>
         </div>
     </div>
 
@@ -214,6 +219,7 @@
         const team2Section = document.getElementById('team2');
         const resetButton = document.getElementById('reset-button');
         const backToStartButton = document.getElementById('back-to-start-button');
+        const fullscreenButton = document.getElementById('fullscreen-button');
 
         let team1Points = 0;
         let team2Points = 0;
@@ -330,6 +336,16 @@
 
         backToStartButton.addEventListener('click', () => {
             resetAppState();
+        });
+
+        fullscreenButton.addEventListener('click', () => {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen();
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen(); 
+                }
+            }
         });
 
         team1Colors.querySelectorAll('.color-swatch').forEach(swatch => {
