@@ -102,13 +102,18 @@
             z-index: 1000;
         }
 
+        #results-screen {
+            justify-content: flex-start;
+            padding-top: 20px;
+        }
+
         .team-setup {
             margin: 10px 0;
             width: 80%;
             max-width: 300px;
         }
         
-        .team-name-input, .scoring-select {
+        .team-name-input {
             padding: 10px;
             font-size: 1.2em;
             width: 100%;
@@ -118,7 +123,15 @@
         }
 
         .scoring-select {
-            padding: 10px 20px; /* Added horizontal padding */
+            padding: 10px 20px;
+            font-size: 1.2em;
+            width: 80%;
+            max-width: 300px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            margin: 10px auto; /* Centered with padding */
+            display: block; /* To apply margin auto correctly */
         }
 
         .color-selector {
@@ -270,9 +283,9 @@
     </div>
 
     <div id="results-screen" style="display: none;">
+        <button class="home-button" id="back-to-home-from-results">BACK TO HOME</button>
         <h2>Past Results</h2>
         <ul id="results-list"></ul>
-        <button class="home-button" id="back-to-home-from-results">BACK TO HOME</button>
     </div>
 
     <script>
@@ -545,7 +558,9 @@
 
         endMatchButton.addEventListener('click', () => {
             saveGame('Complete');
-            resetAppState();
+            gameScreen.style.display = 'none';
+            resultsScreen.style.display = 'flex';
+            loadResults();
         });
 
         team1Colors.querySelectorAll('.color-swatch').forEach(swatch => {
