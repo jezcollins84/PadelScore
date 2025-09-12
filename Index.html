@@ -285,23 +285,23 @@
             setupScreen.style.display = 'flex';
         }
 
-        // Fullscreen API with vendor prefixes for better compatibility
-        function toggleFullscreen() {
+        // More robust fullscreen toggle function
+        async function toggleFullscreen() {
             if (!document.fullscreenElement) {
-                if (document.documentElement.requestFullscreen) {
-                    document.documentElement.requestFullscreen();
-                } else if (document.documentElement.webkitRequestFullscreen) { /* Safari */
-                    document.documentElement.webkitRequestFullscreen();
-                } else if (document.documentElement.msRequestFullscreen) { /* IE11 */
-                    document.documentElement.msRequestFullscreen();
+                try {
+                    await document.documentElement.requestFullscreen();
+                } catch (e) {
+                    // Fallback for older browsers or if request fails
+                    console.error("Fullscreen failed:", e);
+                    if (document.documentElement.webkitRequestFullscreen) {
+                        document.documentElement.webkitRequestFullscreen();
+                    }
                 }
             } else {
                 if (document.exitFullscreen) {
                     document.exitFullscreen();
-                } else if (document.webkitExitFullscreen) { /* Safari */
+                } else if (document.webkitExitFullscreen) {
                     document.webkitExitFullscreen();
-                } else if (document.msExitFullscreen) { /* IE11 */
-                    document.msExitFullscreen();
                 }
             }
         }
