@@ -30,11 +30,7 @@
             transition: background-color 0.2s;
         }
 
-        #team1:active {
-            filter: brightness(85%);
-        }
-
-        #team2:active {
+        #team1:active, #team2:active {
             filter: brightness(85%);
         }
 
@@ -103,25 +99,37 @@
         }
 
         .team-setup {
-            display: flex;
-            align-items: center;
             margin: 10px 0;
             width: 80%;
             max-width: 300px;
         }
-
-        .team-input, .scoring-select {
+        
+        .team-name-input, .scoring-select {
             padding: 10px;
             font-size: 1.2em;
-            flex-grow: 1;
+            width: 100%;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .color-selector {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
         }
         
-        .color-picker {
-            margin-left: 10px;
+        .color-swatch {
             width: 40px;
             height: 40px;
-            border: none;
+            border-radius: 50%;
+            border: 2px solid transparent;
             cursor: pointer;
+            transition: border-color 0.2s;
+        }
+
+        .color-swatch.selected {
+            border-color: #2c3e50;
         }
 
         .start-button {
@@ -141,12 +149,26 @@
     <div id="setup-screen">
         <h2>Padel Scorer Setup</h2>
         <div class="team-setup">
-            <input type="text" class="team-input" id="team1-name-input" placeholder="Team 1 Name">
-            <input type="color" class="color-picker" id="team1-color-picker" value="#3498db">
+            <input type="text" class="team-name-input" id="team1-name-input" placeholder="Team 1 Name">
+            <div class="color-selector" id="team1-colors">
+                <div class="color-swatch selected" data-color="#3498db" style="background-color: #3498db;"></div>
+                <div class="color-swatch" data-color="#e74c3c" style="background-color: #e74c3c;"></div>
+                <div class="color-swatch" data-color="#2ecc71" style="background-color: #2ecc71;"></div>
+                <div class="color-swatch" data-color="#f1c40f" style="background-color: #f1c40f;"></div>
+                <div class="color-swatch" data-color="#9b59b6" style="background-color: #9b59b6;"></div>
+                <div class="color-swatch" data-color="#34495e" style="background-color: #34495e;"></div>
+            </div>
         </div>
         <div class="team-setup">
-            <input type="text" class="team-input" id="team2-name-input" placeholder="Team 2 Name">
-            <input type="color" class="color-picker" id="team2-color-picker" value="#e74c3c">
+            <input type="text" class="team-name-input" id="team2-name-input" placeholder="Team 2 Name">
+            <div class="color-selector" id="team2-colors">
+                <div class="color-swatch" data-color="#3498db" style="background-color: #3498db;"></div>
+                <div class="color-swatch selected" data-color="#e74c3c" style="background-color: #e74c3c;"></div>
+                <div class="color-swatch" data-color="#2ecc71" style="background-color: #2ecc71;"></div>
+                <div class="color-swatch" data-color="#f1c40f" style="background-color: #f1c40f;"></div>
+                <div class="color-swatch" data-color="#9b59b6" style="background-color: #9b59b6;"></div>
+                <div class="color-swatch" data-color="#34495e" style="background-color: #34495e;"></div>
+            </div>
         </div>
         <select class="scoring-select" id="scoring-type-select">
             <option value="tennis">Tennis Scoring</option>
@@ -169,7 +191,7 @@
         </div>
 
         <div class="button-group">
-            <button class="reset-button" id="reset-button">RESET</button>
+            <button class="reset-button" id="reset-button">RESET GAME</button>
             <button class="back-button" id="back-to-start-button">BACK</button>
         </div>
     </div>
@@ -180,8 +202,8 @@
         const gameScreen = document.getElementById('game-screen');
         const team1NameInput = document.getElementById('team1-name-input');
         const team2NameInput = document.getElementById('team2-name-input');
-        const team1ColorPicker = document.getElementById('team1-color-picker');
-        const team2ColorPicker = document.getElementById('team2-color-picker');
+        const team1Colors = document.getElementById('team1-colors');
+        const team2Colors = document.getElementById('team2-colors');
         const scoringTypeSelect = document.getElementById('scoring-type-select');
         const startButton = document.getElementById('start-button');
         const team1NameDisplay = document.getElementById('team1-name');
@@ -197,10 +219,13 @@
         let team2Points = 0;
         let team1Games = 0;
         let team2Games = 0;
-        let scoringType = "tennis"; // Default
+        let scoringType = "tennis";
 
         // Point values for tennis scoring
         const points = ["0", "15", "30", "40"];
+        
+        let team1Color = '#3498db';
+        let team2Color = '#e74c3c';
 
         // Functions
         function updatePointScore() {
@@ -263,8 +288,8 @@
             team1NameDisplay.textContent = team1Name;
             team2NameDisplay.textContent = team2Name;
             
-            team1Section.style.backgroundColor = team1ColorPicker.value;
-            team2Section.style.backgroundColor = team2ColorPicker.value;
+            team1Section.style.backgroundColor = team1Color;
+            team2Section.style.backgroundColor = team2Color;
 
             setupScreen.style.display = 'none';
             gameScreen.style.display = 'flex';
@@ -305,6 +330,22 @@
 
         backToStartButton.addEventListener('click', () => {
             resetAppState();
+        });
+
+        team1Colors.querySelectorAll('.color-swatch').forEach(swatch => {
+            swatch.addEventListener('click', () => {
+                team1Colors.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('selected'));
+                swatch.classList.add('selected');
+                team1Color = swatch.dataset.color;
+            });
+        });
+
+        team2Colors.querySelectorAll('.color-swatch').forEach(swatch => {
+            swatch.addEventListener('click', () => {
+                team2Colors.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('selected'));
+                swatch.classList.add('selected');
+                team2Color = swatch.dataset.color;
+            });
         });
     </script>
 </body>
