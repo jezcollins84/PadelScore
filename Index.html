@@ -339,8 +339,15 @@
         });
 
         fullscreenButton.addEventListener('click', () => {
+            const body = document.body;
             if (!document.fullscreenElement) {
-                document.documentElement.requestFullscreen();
+                if (body.requestFullscreen) {
+                    body.requestFullscreen();
+                } else if (body.webkitRequestFullscreen) { /* Safari on iOS */
+                    body.webkitRequestFullscreen();
+                } else if (body.msRequestFullscreen) { /* IE11 */
+                    body.msRequestFullscreen();
+                }
             } else {
                 if (document.exitFullscreen) {
                     document.exitFullscreen(); 
