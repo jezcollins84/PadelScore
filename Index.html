@@ -65,7 +65,7 @@
             justify-content: space-around;
         }
 
-        .reset-button, .back-button, .fullscreen-button {
+        .reset-button, .back-button {
             padding: 10px 20px;
             font-size: 1em;
             border-radius: 5px;
@@ -81,10 +81,6 @@
         
         .back-button {
             background-color: #34495e;
-        }
-        
-        .fullscreen-button {
-            background-color: #f39c12;
         }
 
         /* Initial setup screen styles */
@@ -197,7 +193,6 @@
         <div class="button-group">
             <button class="reset-button" id="reset-button">RESET GAME</button>
             <button class="back-button" id="back-to-start-button">BACK</button>
-            <button class="fullscreen-button" id="fullscreen-button">FULLSCREEN</button>
         </div>
     </div>
 
@@ -219,7 +214,6 @@
         const team2Section = document.getElementById('team2');
         const resetButton = document.getElementById('reset-button');
         const backToStartButton = document.getElementById('back-to-start-button');
-        const fullscreenButton = document.getElementById('fullscreen-button');
 
         let team1Points = 0;
         let team2Points = 0;
@@ -285,27 +279,6 @@
             setupScreen.style.display = 'flex';
         }
 
-        // More robust fullscreen toggle function
-        async function toggleFullscreen() {
-            if (!document.fullscreenElement) {
-                try {
-                    await document.documentElement.requestFullscreen();
-                } catch (e) {
-                    // Fallback for older browsers or if request fails
-                    console.error("Fullscreen failed:", e);
-                    if (document.documentElement.webkitRequestFullscreen) {
-                        document.documentElement.webkitRequestFullscreen();
-                    }
-                }
-            } else {
-                if (document.exitFullscreen) {
-                    document.exitFullscreen();
-                } else if (document.webkitExitFullscreen) {
-                    document.webkitExitFullscreen();
-                }
-            }
-        }
-
         // Event Listeners
         startButton.addEventListener('click', () => {
             const team1Name = team1NameInput.value || "Team 1";
@@ -358,8 +331,6 @@
         backToStartButton.addEventListener('click', () => {
             resetAppState();
         });
-
-        fullscreenButton.addEventListener('click', toggleFullscreen);
 
         team1Colors.querySelectorAll('.color-swatch').forEach(swatch => {
             swatch.addEventListener('click', () => {
