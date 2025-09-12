@@ -101,10 +101,22 @@
             align-items: center;
             z-index: 1000;
         }
-
+        
         #results-screen {
             justify-content: flex-start;
             padding-top: 20px;
+        }
+
+        .logo {
+            position: absolute;
+            top: 20px;
+            width: 50px;
+            height: 50px;
+            margin-bottom: 20px;
+        }
+
+        .logo img {
+            width: 100%;
         }
 
         .team-setup {
@@ -130,8 +142,8 @@
             box-sizing: border-box;
             border: 1px solid #ccc;
             border-radius: 5px;
-            margin: 10px auto; /* Centered with padding */
-            display: block; /* To apply margin auto correctly */
+            margin: 10px auto;
+            display: block;
         }
 
         .color-selector {
@@ -217,6 +229,7 @@
             cursor: pointer;
             font-weight: bold;
             color: white;
+            margin-left: 5px;
         }
 
         .resume-button {
@@ -231,6 +244,9 @@
 <body>
 
     <div id="setup-screen">
+        <div class="logo">
+            <img src="https://www.flaticon.com/svg/static/icons/svg/2507/2507043.svg" alt="Padel Racket Logo">
+        </div>
         <h2>Padel Scorer Setup</h2>
         <div class="team-setup">
             <input type="text" class="team-name-input" id="team1-name-input" placeholder="Team 1 Name">
@@ -263,6 +279,9 @@
     </div>
 
     <div class="container" id="game-screen" style="display: none;">
+        <div class="logo">
+            <img src="https://www.flaticon.com/svg/static/icons/svg/2507/2507043.svg" alt="Padel Racket Logo">
+        </div>
         <div class="team-section" id="team1">
             <span id="team1-name"></span>
         </div>
@@ -283,6 +302,9 @@
     </div>
 
     <div id="results-screen" style="display: none;">
+        <div class="logo">
+            <img src="https://www.flaticon.com/svg/static/icons/svg/2507/2507043.svg" alt="Padel Racket Logo">
+        </div>
         <button class="home-button" id="back-to-home-from-results">BACK TO HOME</button>
         <h2>Past Results</h2>
         <ul id="results-list"></ul>
@@ -413,11 +435,9 @@
             games.forEach(game => {
                 const li = document.createElement('li');
                 li.className = 'result-item';
-                let actionButton = '';
+                let resumeButton = '';
                 if (game.status === 'Live') {
-                    actionButton = `<button class="resume-button" data-timestamp="${game.timestamp}">RESUME</button>`;
-                } else {
-                    actionButton = `<button class="delete-button" data-timestamp="${game.timestamp}">DELETE</button>`;
+                    resumeButton = `<button class="resume-button" data-timestamp="${game.timestamp}">RESUME</button>`;
                 }
                 li.innerHTML = `
                     <div class="result-details">
@@ -426,7 +446,10 @@
                         <div>${game.date} at ${game.time}</div>
                         <div>Status: ${game.status}</div>
                     </div>
-                    ${actionButton}
+                    <div>
+                        ${resumeButton}
+                        <button class="delete-button" data-timestamp="${game.timestamp}">DELETE</button>
+                    </div>
                 `;
                 resultsList.appendChild(li);
             });
