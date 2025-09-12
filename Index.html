@@ -117,6 +117,10 @@
             border-radius: 5px;
         }
 
+        .scoring-select {
+            padding: 10px 20px; /* Added horizontal padding */
+        }
+
         .color-selector {
             display: flex;
             justify-content: space-between;
@@ -183,13 +187,13 @@
             padding-right: 10px;
         }
         
-        .result-details .score {
+        .result-details .teams {
             font-size: 1.2em;
             font-weight: bold;
             margin-bottom: 5px;
         }
 
-        .result-details .teams {
+        .result-details .score {
             font-style: italic;
         }
 
@@ -239,7 +243,7 @@
         </div>
         <select class="scoring-select" id="scoring-type-select">
             <option value="tennis">Tennis Scoring</option>
-            <option value="games-only">Games Only</option>
+            <option value="games-only" selected>Games Only</option>
         </select>
         <button class="start-button" id="start-button">Start Match</button>
         <button class="past-results-button" id="past-results-button">Past Results</button>
@@ -301,9 +305,10 @@
         let team2Games = 0;
         let team1Name = "Team 1";
         let team2Name = "Team 2";
-        let scoringType = "tennis";
+        let scoringType = "games-only";
         let team1Color = '#3498db';
         let team2Color = '#e74c3c';
+        let currentMatchTimestamp = null;
 
         // Point values for tennis scoring
         const points = ["0", "15", "30", "40"];
@@ -350,7 +355,8 @@
         }
         
         function saveGame(status) {
-            const now = new Date();
+            let games = JSON.parse(localStorage.getItem('padelGames')) || [];
+            
             const gameData = {
                 team1Name: team1Name,
                 team2Name: team2Name,
@@ -358,15 +364,26 @@
                 team2Games: team2Games,
                 team1Points: team1Points,
                 team2Points: team2Points,
+                team1Color: team1Color,
+                team2Color: team2Color,
                 scoringType: scoringType,
-                date: now.toLocaleDateString(),
-                time: now.toLocaleTimeString(undefined, {hour: '2-digit', minute: '2-digit'}),
+                date: new Date().toLocaleDateString(),
+                time: new Date().toLocaleTimeString(undefined, {hour: '2-digit', minute: '2-digit'}),
                 status: status,
-                timestamp: now.getTime()
+                timestamp: currentMatchTimestamp || new Date().getTime()
             };
 
-            let games = JSON.parse(localStorage.getItem('padelGames')) || [];
-            games.unshift(gameData); // Add to the beginning of the array
+            if (currentMatchTimestamp) {
+                // Update existing game
+                const existingGameIndex = games.findIndex(game => game.timestamp === currentMatchTimestamp);
+                if (existingGameIndex !== -1) {
+                    games[existingGameIndex] = gameData;
+                }
+            } else {
+                // Add new game
+                games.unshift(gameData);
+            }
+            
             localStorage.setItem('padelGames', JSON.stringify(games));
         }
 
@@ -391,8 +408,8 @@
                 }
                 li.innerHTML = `
                     <div class="result-details">
-                        <div class="score">${game.team1Games} - ${game.team2Games}</div>
                         <div class="teams">${game.team1Name} vs ${game.team2Name}</div>
+                        <div class="score">${game.team1Games} - ${game.team2Games}</div>
                         <div>${game.date} at ${game.time}</div>
                         <div>Status: ${game.status}</div>
                     </div>
@@ -403,9 +420,9 @@
 
             document.querySelectorAll('.delete-button').forEach(button => {
                 button.addEventListener('click', (e) => {
-                    const timestampToDelete = e.target.dataset.timestamp;
+                    const timestampToDelete = Number(e.target.dataset.timestamp);
                     let games = JSON.parse(localStorage.getItem('padelGames')) || [];
-                    games = games.filter(game => game.timestamp != timestampToDelete);
+                    games = games.filter(game => game.timestamp !== timestampToDelete);
                     localStorage.setItem('padelGames', JSON.stringify(games));
                     loadResults(); // Reload the list
                 });
@@ -413,9 +430,9 @@
 
             document.querySelectorAll('.resume-button').forEach(button => {
                 button.addEventListener('click', (e) => {
-                    const timestampToResume = e.target.dataset.timestamp;
+                    const timestampToResume = Number(e.target.dataset.timestamp);
                     const games = JSON.parse(localStorage.getItem('padelGames')) || [];
-                    const gameToResume = games.find(game => game.timestamp == timestampToResume);
+                    const gameToResume = games.find(game => game.timestamp === timestampToResume);
                     
                     if (gameToResume) {
                         team1Name = gameToResume.team1Name;
@@ -425,11 +442,17 @@
                         team1Points = gameToResume.team1Points;
                         team2Points = gameToResume.team2Points;
                         scoringType = gameToResume.scoringType;
+                        team1Color = gameToResume.team1Color;
+                        team2Color = gameToResume.team2Color;
+                        currentMatchTimestamp = gameToResume.timestamp;
 
                         team1NameInput.value = team1Name;
                         team2NameInput.value = team2Name;
                         team1NameDisplay.textContent = team1Name;
                         team2NameDisplay.textContent = team2Name;
+                        team1Section.style.backgroundColor = team1Color;
+                        team2Section.style.backgroundColor = team2Color;
+                        scoringTypeSelect.value = scoringType;
 
                         gameScreen.style.display = 'flex';
                         resultsScreen.style.display = 'none';
@@ -446,6 +469,7 @@
             team2Points = 0;
             team1Games = 0;
             team2Games = 0;
+            currentMatchTimestamp = null;
             updateGameScore();
             updatePointScore();
             gameScreen.style.display = 'none';
