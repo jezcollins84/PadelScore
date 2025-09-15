@@ -9,10 +9,10 @@
             font-family: sans-serif;
             margin: 0;
             padding: 0;
-            background-color: #ffffff; /* Changed to white to prevent color flash */
+            background-color: #ffffff;
             text-align: center;
             height: 100vh;
-            overflow: hidden; /* This prevents the body from scrolling */
+            overflow: hidden;
         }
 
         .container {
@@ -98,7 +98,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: white; /* Removed from here */
+            background-color: white;
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -153,16 +153,29 @@
             border-radius: 5px;
         }
 
-        .scoring-select {
-            padding: 10px 20px;
-            font-size: 1.2em;
+        /* Styles for radio buttons */
+        .scoring-options {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
             width: 80%;
             max-width: 300px;
-            box-sizing: border-box;
-            border: 1px solid #ccc;
-            border-radius: 5px;
             margin: 10px auto;
-            display: block;
+            text-align: left;
+        }
+
+        .scoring-options label {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            font-size: 1.2em;
+            cursor: pointer;
+        }
+        
+        .scoring-options input[type="radio"] {
+            margin-right: 10px;
+            width: 1.2em;
+            height: 1.2em;
         }
 
         .color-selector {
@@ -296,10 +309,20 @@
                 <div class="color-swatch" data-color="#34495e" style="background-color: #34495e;"></div>
             </div>
         </div>
-        <select class="scoring-select" id="scoring-type-select">
-            <option value="tennis">Tennis Scoring</option>
-            <option value="games-only" selected>Games Only</option>
-        </select>
+        <div class="scoring-options">
+            <label>
+                <input type="radio" name="scoring-type" value="full-tennis-points" checked>
+                Full Tennis Points
+            </label>
+            <label>
+                <input type="radio" name="scoring-type" value="point-counter-americano">
+                Point Counter (Americano)
+            </label>
+            <label>
+                <input type="radio" name="scoring-type" value="tennis-games">
+                Tennis Games
+            </label>
+        </div>
         <button class="start-button" id="start-button">Start Match</button>
         <button class="past-results-button" id="past-results-button">Past Results</button>
     </div>
@@ -339,7 +362,7 @@
         const team2NameInput = document.getElementById('team2-name-input');
         const team1Colors = document.getElementById('team1-colors');
         const team2Colors = document.getElementById('team2-colors');
-        const scoringTypeSelect = document.getElementById('scoring-type-select');
+        const scoringOptions = document.getElementsByName('scoring-type');
         const startButton = document.getElementById('start-button');
         const pastResultsButton = document.getElementById('past-results-button');
         const team1NameDisplay = document.getElementById('team1-name');
@@ -360,7 +383,7 @@
         let team2Games = 0;
         let team1Name = "Team 1";
         let team2Name = "Team 2";
-        let scoringType = "games-only";
+        let scoringType = "full-tennis-points";
         let team1Color = '#3498db';
         let team2Color = '#e74c3c';
         let currentMatchTimestamp = null;
@@ -370,7 +393,7 @@
         
         // Functions
         function updatePointScore() {
-            if (scoringType === "games-only") {
+            if (scoringType === "point-counter-americano" || scoringType === "tennis-games") {
                 pointScoreDisplay.style.display = 'none';
                 return;
             }
@@ -506,7 +529,8 @@
                         team2NameDisplay.textContent = team2Name;
                         team1Section.style.backgroundColor = team1Color;
                         team2Section.style.backgroundColor = team2Color;
-                        scoringTypeSelect.value = scoringType;
+                        
+                        document.querySelector(`input[name="scoring-type"][value="${scoringType}"]`).checked = true;
 
                         gameScreen.style.display = 'flex';
                         resultsScreen.style.display = 'none';
@@ -531,11 +555,34 @@
             setupScreen.style.display = 'flex';
         }
 
+        function getSelectedScoringType() {
+            for (const radio of scoringOptions) {
+                if (radio.checked) {
+                    return radio.value;
+                }
+            }
+            return 'full-tennis-points';
+        }
+
+        function setInitialScoringType() {
+            const savedScoringType = localStorage.getItem('lastScoringType');
+            if (savedScoringType) {
+                const radio = document.querySelector(`input[name="scoring-type"][value="${savedScoringType}"]`);
+                if (radio) {
+                    radio.checked = true;
+                }
+            }
+        }
+        
+        document.addEventListener('DOMContentLoaded', setInitialScoringType);
+
+
         // Event Listeners
         startButton.addEventListener('click', () => {
             team1Name = team1NameInput.value || "Team 1";
             team2Name = team2NameInput.value || "Team 2";
-            scoringType = scoringTypeSelect.value;
+            scoringType = getSelectedScoringType();
+            localStorage.setItem('lastScoringType', scoringType);
             
             team1NameDisplay.textContent = team1Name;
             team2NameDisplay.textContent = team2Name;
@@ -561,7 +608,9 @@
         });
 
         team1Section.addEventListener('click', () => {
-            if (scoringType === "games-only") {
+            if (scoringType === "point-counter-americano") {
+                team1Games++;
+            } else if (scoringType === "tennis-games") {
                 team1Games++;
             } else {
                 team1Points++;
@@ -572,7 +621,9 @@
         });
 
         team2Section.addEventListener('click', () => {
-            if (scoringType === "games-only") {
+            if (scoringType === "point-counter-americano") {
+                team2Games++;
+            } else if (scoringType === "tennis-games") {
                 team2Games++;
             } else {
                 team2Points++;
@@ -583,7 +634,7 @@
         });
 
         resetButton.addEventListener('click', () => {
-            if (scoringType === "games-only") {
+            if (scoringType === "point-counter-americano" || scoringType === "tennis-games") {
                 team1Games = 0;
                 team2Games = 0;
                 updateGameScore();
