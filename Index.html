@@ -50,7 +50,7 @@
             text-align: center;
             font-size: 3em;
         }
-        
+
         .score-display .sets {
             font-size: 0.5em;
             margin-bottom: 5px;
@@ -619,6 +619,15 @@
 
         // Event Listeners
         startButton.addEventListener('click', () => {
+            // Reset all variables to ensure a clean slate
+            team1Points = 0;
+            team2Points = 0;
+            team1Games = 0;
+            team2Games = 0;
+            team1Sets = 0;
+            team2Sets = 0;
+            currentMatchTimestamp = null;
+            
             team1Name = team1NameInput.value || "Team 1";
             team2Name = team2NameInput.value || "Team 2";
             scoringType = getSelectedScoringType();
