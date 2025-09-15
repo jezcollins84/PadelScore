@@ -315,16 +315,16 @@
         </div>
         <div class="scoring-options">
             <label>
-                <input type="radio" name="scoring-type" value="tennis-games">
+                <input type="radio" name="scoring-type" value="tennis-games" checked>
                 Tennis Games
-            </label>    
-            <label>
-                <input type="radio" name="scoring-type" value="point-counter-americano">
-                Point/Game Counter (Americano)
             </label>
             <label>
-                <input type="radio" name="scoring-type" value="full-tennis-points" checked>
+                <input type="radio" name="scoring-type" value="full-tennis-points">
                 Tennis Points
+            </label>
+            <label>
+                <input type="radio" name="scoring-type" value="point-counter-americano">
+                Point/Game Counter
             </label>
         </div>
         <button class="start-button" id="start-button">Start Match</button>
@@ -391,7 +391,7 @@
         let team2Sets = 0;
         let team1Name = "Team 1";
         let team2Name = "Team 2";
-        let scoringType = "full-tennis-points";
+        let scoringType = "tennis-games";
         let team1Color = '#3498db';
         let team2Color = '#e74c3c';
         let currentMatchTimestamp = null;
@@ -458,127 +458,6 @@
             }
         }
 
-        function resetPoints() {
-            team1Points = 0;
-            team2Points = 0;
-            updatePointScore();
-        }
-        
-        function saveGame(status) {
-            let games = JSON.parse(localStorage.getItem('padelGames')) || [];
-            
-            const gameData = {
-                team1Name: team1Name,
-                team2Name: team2Name,
-                team1Games: team1Games,
-                team2Games: team2Games,
-                team1Sets: team1Sets,
-                team2Sets: team2Sets,
-                team1Points: team1Points,
-                team2Points: team2Points,
-                team1Color: team1Color,
-                team2Color: team2Color,
-                scoringType: scoringType,
-                date: new Date().toLocaleDateString(),
-                time: new Date().toLocaleTimeString(undefined, {hour: '2-digit', minute: '2-digit'}),
-                status: status,
-                timestamp: currentMatchTimestamp || new Date().getTime()
-            };
-
-            if (currentMatchTimestamp) {
-                const existingGameIndex = games.findIndex(game => game.timestamp === currentMatchTimestamp);
-                if (existingGameIndex !== -1) {
-                    games[existingGameIndex] = gameData;
-                }
-            } else {
-                games.unshift(gameData);
-            }
-            
-            localStorage.setItem('padelGames', JSON.stringify(games));
-        }
-
-        function loadResults() {
-            let games = JSON.parse(localStorage.getItem('padelGames')) || [];
-            resultsList.innerHTML = '';
-            if (games.length === 0) {
-                const noResults = document.createElement('p');
-                noResults.textContent = "No past results found.";
-                noResults.style.textAlign = 'center';
-                resultsList.appendChild(noResults);
-                return;
-            }
-            games.forEach(game => {
-                const li = document.createElement('li');
-                li.className = 'result-item';
-                let resumeButton = '';
-                if (game.status === 'Live') {
-                    resumeButton = `<button class="resume-button" data-timestamp="${game.timestamp}">RESUME</button>`;
-                }
-                li.innerHTML = `
-                    <div class="result-details">
-                        <div class="teams">${game.team1Name} vs ${game.team2Name}</div>
-                        <div class="score">${game.team1Games} - ${game.team2Games}</div>
-                        <div>${game.date} at ${game.time}</div>
-                        <div>Status: ${game.status}</div>
-                    </div>
-                    <div class="result-actions">
-                        ${resumeButton}
-                        <button class="delete-button" data-timestamp="${game.timestamp}">DELETE</button>
-                    </div>
-                `;
-                resultsList.appendChild(li);
-            });
-
-            document.querySelectorAll('.delete-button').forEach(button => {
-                button.addEventListener('click', (e) => {
-                    const timestampToDelete = Number(e.target.dataset.timestamp);
-                    let games = JSON.parse(localStorage.getItem('padelGames')) || [];
-                    games = games.filter(game => game.timestamp !== timestampToDelete);
-                    localStorage.setItem('padelGames', JSON.stringify(games));
-                    loadResults();
-                });
-            });
-
-            document.querySelectorAll('.resume-button').forEach(button => {
-                button.addEventListener('click', (e) => {
-                    const timestampToResume = Number(e.target.dataset.timestamp);
-                    const games = JSON.parse(localStorage.getItem('padelGames')) || [];
-                    const gameToResume = games.find(game => game.timestamp === timestampToResume);
-                    
-                    if (gameToResume) {
-                        team1Name = gameToResume.team1Name;
-                        team2Name = gameToResume.team2Name;
-                        team1Games = gameToResume.team1Games;
-                        team2Games = gameToResume.team2Games;
-                        team1Sets = gameToResume.team1Sets || 0;
-                        team2Sets = gameToResume.team2Sets || 0;
-                        team1Points = gameToResume.team1Points || 0;
-                        team2Points = gameToResume.team2Points || 0;
-                        scoringType = gameToResume.scoringType;
-                        team1Color = gameToResume.team1Color;
-                        team2Color = gameToResume.team2Color;
-                        currentMatchTimestamp = gameToResume.timestamp;
-
-                        team1NameInput.value = team1Name;
-                        team2NameInput.value = team2Name;
-                        team1NameDisplay.textContent = team1Name;
-                        team2NameDisplay.textContent = team2Name;
-                        team1Section.style.backgroundColor = team1Color;
-                        team2Section.style.backgroundColor = team2Color;
-                        
-                        document.querySelector(`input[name="scoring-type"][value="${scoringType}"]`).checked = true;
-
-                        gameScreen.style.display = 'flex';
-                        resultsScreen.style.display = 'none';
-
-                        updateSetScore();
-                        updateGameScore();
-                        updatePointScore();
-                    }
-                });
-            });
-        }
-        
         function resetAppState() {
             team1Points = 0;
             team2Points = 0;
@@ -601,7 +480,7 @@
                     return radio.value;
                 }
             }
-            return 'full-tennis-points';
+            return 'tennis-games';
         }
 
         function setInitialScoringType() {
@@ -619,14 +498,7 @@
 
         // Event Listeners
         startButton.addEventListener('click', () => {
-            // Reset all variables to ensure a clean slate
-            team1Points = 0;
-            team2Points = 0;
-            team1Games = 0;
-            team2Games = 0;
-            team1Sets = 0;
-            team2Sets = 0;
-            currentMatchTimestamp = null;
+            resetAppState();
             
             team1Name = team1NameInput.value || "Team 1";
             team2Name = team2NameInput.value || "Team 2";
